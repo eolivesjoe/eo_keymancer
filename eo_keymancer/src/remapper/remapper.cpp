@@ -41,7 +41,7 @@ namespace remapper
 			return false;
 		}
 
-		size_t delim = line.find("--");
+		size_t delim = line.find("->");
 
 		return delim != std::string::npos && delim != 0 && delim + 2 < line.size();
 	}
@@ -49,7 +49,7 @@ namespace remapper
 	void Remapper::processMappingLine(const std::string& line, std::unordered_map<int, int>& remaps)
 	{
 		char from = std::tolower(line[0]);
-		char to = std::tolower(line[line.find("--") + 2]);
+		char to = std::tolower(line[line.find("->") + 2]);
 
 		remaps[VkKeyScanA(from) & 0xFF] = VkKeyScanA(to) & 0xFF;
 	}
