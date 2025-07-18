@@ -11,4 +11,12 @@ add_executable(eo_keymancer
     eo_keymancer/src/main.cpp
     eo_keymancer/src/remapper/remapper.cpp
     eo_keymancer/src/keyhook/keyhook.cpp
+	eo_keymancer/src/logger/logger.cpp
+)
+
+file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/config)
+configure_file(
+    ${CMAKE_SOURCE_DIR}/eo_keymancer/config/remap.cfg
+    ${CMAKE_SOURCE_DIR}/bin/config/remap.cfg
+    COPYONLY
 )

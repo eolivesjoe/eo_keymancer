@@ -10,8 +10,8 @@ namespace remapper
 	public:
 		Remapper(const std::string& config_path);
 		bool load();
-		bool hasMapping(int vkCode) const;
-		int getMappedKey(int vkCode) const;
+		bool hasMapping(int virtual_key_code) const;
+		int getMappedKey(int virtual_key_code) const;
 
 	private:
 		bool isValidMappingLine(const std::string& line); 

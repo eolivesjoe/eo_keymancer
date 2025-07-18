@@ -1,8 +1,12 @@
-#include "remapper.h"
-#include "keyhook.h"
+#include "remapper/remapper.h"
+#include "keyhook/keyhook.h"
+#include "logger/logger.h"
 
-int main() {
-    remapper::Remapper remapper("../config/remap.cfg");
+int main() 
+{
+    logger::init();
+
+    remapper::Remapper remapper("config/remap.cfg");
     if (!remapper.load())
     {
         return 1;

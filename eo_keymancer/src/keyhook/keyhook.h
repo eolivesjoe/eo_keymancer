@@ -1,7 +1,7 @@
 #pragma once
 
 #include <windows.h>
-#include "remapper.h"
+#include "../remapper/remapper.h"
 
 namespace remapper
 {
@@ -13,6 +13,9 @@ namespace remapper
 
 	private:
 		static LRESULT CALLBACK lowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
+
+	private:
+		static Remapper* m_remapper;
 
 	};
 } // namespace remapper
