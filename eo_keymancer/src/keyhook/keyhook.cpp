@@ -4,11 +4,11 @@
 #include <windows.h>
 #include <iostream>
 
-namespace remapper
+namespace keyHook
 {
-	Remapper* remapper::KeyHook::m_remapper = nullptr;
+	remapper::Remapper* m_remapper = nullptr;
 
-	KeyHook::KeyHook(Remapper& remapper)
+	KeyHook::KeyHook(remapper::Remapper& remapper)
 	{
 		m_remapper = &remapper;
 	}

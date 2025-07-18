@@ -12,7 +12,7 @@ int main()
         return 1;
     }
 
-    remapper::KeyHook hook(remapper);
+    keyHook::KeyHook hook(remapper);
     hook.run();
 
     return 0;

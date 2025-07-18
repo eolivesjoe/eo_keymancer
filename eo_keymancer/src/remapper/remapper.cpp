@@ -8,7 +8,6 @@
 
 namespace remapper
 {
-
 	Remapper::Remapper(const std::string& config_path) : config_path(config_path) { }
 
 	bool Remapper::load()
