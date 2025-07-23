@@ -19,21 +19,41 @@ namespace keyHook
 		if (nCode == HC_ACTION)
 		{
 			KBDLLHOOKSTRUCT* p = (KBDLLHOOKSTRUCT*)lParam;
+			input::Input incoming_input = keyboardVkToInput(p->vkCode);
 
-			if (wParam == WM_KEYDOWN && m_remapper->hasMapping((int)p->vkCode))
+			if (m_remapper->hasMapping(incoming_input))
 			{
-				int new_key = m_remapper->getMappedKey((int)p->vkCode);
+				input::Input mapped_key = m_remapper->getMappedKey(incoming_input);
 
-				INPUT input = { 0 };
-				input.type = INPUT_KEYBOARD;
-				input.ki.wVk = new_key;
-				SendInput(1, &input, sizeof(INPUT));
+				INPUT new_input = { 0 };
+				new_input.type = INPUT_KEYBOARD;
+				new_input.ki.wVk = mapped_key.code;
 
+				if (wParam == WM_KEYDOWN || WM_SYSKEYDOWN)
+				{
+					new_input.ki.dwFlags = 0;
+				}
+				else if (wParam == WM_KEYUP || WM_SYSKEYUP)\
+				{
+					new_input.ki.dwFlags = KEYEVENTF_KEYUP;
+				}
+				else
+				{
+					return CallNextHookEx(nullptr, nCode, wParam, lParam);
+				}
+
+				SendInput(1, &new_input, sizeof(INPUT));
 				return 1;
 			}
 		}
 		return CallNextHookEx(nullptr, nCode, wParam, lParam);
 	}
+
+	input::Input KeyHook::keyboardVkToInput(DWORD vk_code)
+	{
+		return input::Input{ input::InputType::Keyboard, static_cast<int>(vk_code) };
+	}
+
 
 	LRESULT CALLBACK KeyHook::mouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 	{
@@ -53,11 +73,6 @@ namespace keyHook
 			}
 		}
 		return CallNextHookEx(nullptr, nCode, wParam, lParam);
-	}
-
-	input::Input KeyHook::keyboardVkToInput(DWORD vk_code)
-	{
-		return input::Input{ input::InputType::Keyboard, static_cast<int>(vk_code) };
 	}
 
 	input::Input KeyHook::mouseWParamToInput(WPARAM w_param)
