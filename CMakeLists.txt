@@ -9,11 +9,12 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/lib)
 
 add_executable(eo_keymancer
     eo_keymancer/src/main.cpp
+    
     eo_keymancer/src/remapper/remapper.cpp
     eo_keymancer/src/keyhook/keyhook.cpp
 	eo_keymancer/src/autopress/autopress.cpp
 	eo_keymancer/src/logger/logger.cpp
-)
+ "eo_keymancer/src/input/input_hash.h" "eo_keymancer/src/input/input.cpp" "eo_keymancer/src/utils/constants.h" "eo_keymancer/src/input/input_utils.h")
 
 file(MAKE_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/config)
 configure_file(

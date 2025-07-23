@@ -1,5 +1,6 @@
 #include "remapper.h"
 #include "../logger/logger.h"
+#include "../input/input_utils.h"
 
 #include <fstream>
 #include <iostream>
@@ -27,7 +28,7 @@ namespace remapper
 		{
 			if (isValidMappingLine(line))
 			{
-				processMappingLine(line, remaps);
+				processMappingLine(line);
 			}
 		}
 		return true;
@@ -40,27 +41,67 @@ namespace remapper
 			return false;
 		}
 
-		size_t delim = line.find("->");
+		size_t delim = line.find("--");
 
 		return delim != std::string::npos && delim != 0 && delim + 2 < line.size();
 	}
 
-	void Remapper::processMappingLine(const std::string& line, std::unordered_map<int, int>& remaps)
+	void Remapper::processMappingLine(const std::string& line)
 	{
-		char from = std::tolower(line[0]);
-		char to = std::tolower(line[line.find("->") + 2]);
+		size_t delim = line.find("--");
 
-		remaps[VkKeyScanA(from) & 0xFF] = VkKeyScanA(to) & 0xFF;
+		if (delim == std::string::npos || delim == 0 || delim + 2 >= line.size())
+		{
+			logger::warn("there is an error in the cfg, skipping line...");
+			return;
+		}
+
+		std::string fromStr = line.substr(0, delim);
+		std::string toStr = line.substr(delim + 2);
+
+		input::Input from = parseInput(fromStr);
+		input::Input to = parseInput(toStr);
+
+
+		remaps[from] = to;
 	}
 
-	bool Remapper::hasMapping(int virtual_key_code) const 
+	bool Remapper::hasMapping(const input::Input& input) const
 	{
-		return remaps.find(virtual_key_code) != remaps.end();
+		return remaps.find(input) != remaps.end();
 	}
 
-	int Remapper::getMappedKey(int virtual_key_code) const
+	input::Input Remapper::getMappedKey(const input::Input& input) const
 	{
-		auto it = remaps.find(virtual_key_code);
-		return it != remaps.end() ? it->second : 0;
+		auto it = remaps.find(input);
+		return it != remaps.end() ? it->second : input;
+	}
+
+	input::Input Remapper::parseInput(const std::string& s)
+	{
+		if (s.size() == 1)
+		{
+			char c = s[0];
+			short vk = VkKeyScanA(c);
+			return input::Input{ input::InputType::Keyboard, vk & 0xFF };
+		}
+
+		if (s.rfind("mouse") == 0)
+		{
+			if (s == "mouse1") return input::Input{ input::InputType::Mouse, input::MOUSE_MIDDLE };
+			if (s == "mouse2") return input::Input{ input::InputType::Mouse, input::MOUSE_RIGHT };
+			if (s == "mouse3") return input::Input{ input::InputType::Mouse, input::MOUSE_MIDDLE };
+			if (s == "mouse4") return input::Input{ input::InputType::Mouse, input::MOUSE_X1 };
+			if (s == "mouse5") return input::Input{ input::InputType::Mouse, input::MOUSE_X2 };
+		}
+		else
+		{
+			if (s == "space") return input::Input{ input::InputType::Keyboard, VK_SPACE };
+			if (s == "ctrl")  return input::Input{ input::InputType::Keyboard, VK_CONTROL };
+			if (s == "shift") return input::Input{ input::InputType::Keyboard, VK_SHIFT };
+		}
+
+		logger::warn("unrecognized key in cfg");
+		return input::Input{ input::InputType::Keyboard, 0 };
 	}
 }

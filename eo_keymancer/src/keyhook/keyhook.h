@@ -12,7 +12,8 @@ namespace keyHook
 		void run();
 
 	private:
-		static LRESULT CALLBACK lowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
+		static LRESULT CALLBACK keyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
+		static LRESULT CALLBACK mouseProc(int nCode, WPARAM wParam, LPARAM lParam);
 
 	private:
 		static remapper::Remapper * m_remapper;

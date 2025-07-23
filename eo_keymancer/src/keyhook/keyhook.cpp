@@ -1,4 +1,5 @@
 #include "keyhook.h"
+#include "../input/input_utils.h"
 #include "../logger/logger.h"
 
 #include <windows.h>
@@ -13,7 +14,7 @@ namespace keyHook
 		m_remapper = &remapper;
 	}
 
-	LRESULT CALLBACK KeyHook::lowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
+	LRESULT CALLBACK KeyHook::keyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 	{
 		if (nCode == HC_ACTION)
 		{
@@ -34,9 +35,56 @@ namespace keyHook
 		return CallNextHookEx(nullptr, nCode, wParam, lParam);
 	}
 
+	LRESULT CALLBACK KeyHook::mouseProc(int nCode, WPARAM wParam, LPARAM lParam)
+	{
+		if (nCode == HC_ACTION)
+		{
+			MSLLHOOKSTRUCT* p = (MSLLHOOKSTRUCT*)lParam;
+
+			switch (wParam)
+			{
+			case WM_LBUTTONDOWN:
+				// Example: Remap left-click to right-click
+				INPUT input = { 0 };
+				input.type = INPUT_MOUSE;
+				input.mi.dwFlags = MOUSEEVENTF_RIGHTDOWN;
+				SendInput(1, &input, sizeof(INPUT));
+				return 1;
+			}
+		}
+		return CallNextHookEx(nullptr, nCode, wParam, lParam);
+	}
+
+	input::Input KeyHook::keyboardVkToInput(DWORD vk_code)
+	{
+		return input::Input{ input::InputType::Keyboard, static_cast<int>(vk_code) };
+	}
+
+	input::Input KeyHook::mouseWParamToInput(WPARAM w_param)
+	{
+		using namespace input;
+		switch (w_param)
+		{
+		case WM_LBUTTONDOWN:
+		case WM_LBUTTONUP:
+			return Input{ InputType::Mouse, MOUSE_LEFT };
+		case WM_RBUTTONDOWN:
+		case WM_RBUTTONUP:
+			return Input{ InputType::Mouse, MOUSE_RIGHT };
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONUP:
+			return Input{ InputType::Mouse, MOUSE_MIDDLE };
+		case WM_XBUTTONDOWN:
+		case WM_XBUTTONUP:
+			return Input{ InputType::Mouse, MOUSE_X1 };
+		default:
+			return Input{ InputType::Keyboard, 0 };
+		}
+	}
+
 	void KeyHook::run()
 	{
-		HHOOK hook = SetWindowsHookEx(WH_KEYBOARD_LL, lowLevelKeyboardProc, nullptr, 0);
+		HHOOK hook = SetWindowsHookEx(WH_KEYBOARD_LL, keyboardProc, nullptr, 0);
 
 		if (!hook)
 		{
