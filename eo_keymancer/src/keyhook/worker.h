@@ -5,7 +5,7 @@
 #include <condition_variable>
 #include <thread>
 #include <atomic>
-#include <Windows.h>
+#include <windows.h>
 
 namespace keyHook
 {

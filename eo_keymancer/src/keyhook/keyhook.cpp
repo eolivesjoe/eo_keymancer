@@ -3,12 +3,13 @@
 #include "../input/input_utils.h"
 #include "../logger/logger.h"
 
-#include <windows.h>
 #include <iostream>
 
 namespace keyHook
 {
-	remapper::Remapper* m_remapper = nullptr;
+	remapper::Remapper* KeyHook::m_remapper = nullptr;
+	std::atomic<bool> KeyHook::m_keymancer_enabled = false;
+
 
 	KeyHook::KeyHook(remapper::Remapper& remapper)
 	{
@@ -22,7 +23,7 @@ namespace keyHook
 			KBDLLHOOKSTRUCT* p = (KBDLLHOOKSTRUCT*)lParam;
 			input::Input real_input = keyboardVkToInput(p->vkCode, wParam);
 
-			if (m_remapper->hasMapping(real_input))
+			if (m_keymancer_enabled && m_remapper->hasMapping(real_input))
 			{
 				input::Input mapping = m_remapper->getMappedKey(real_input);
 
@@ -78,7 +79,7 @@ namespace keyHook
 			MSLLHOOKSTRUCT* p = (MSLLHOOKSTRUCT*)lParam;
 			input::Input real_input = mouseWParamToInput(wParam);
 
-			if (m_remapper->hasMapping(real_input))
+			if (m_keymancer_enabled && m_remapper->hasMapping(real_input))
 			{
 				input::Input mapping = m_remapper->getMappedKey(real_input);
 
@@ -169,17 +170,27 @@ namespace keyHook
 			return;
 		}
 
+		RegisterHotKey(nullptr, 1, 0, VK_HOME);
+		logger::info("press HOME to toggle rebind...");
+
 		logger::info("keymancer running...");
 
 		MSG msg;
 
 		while (GetMessage(&msg, nullptr, 0, 0))
 		{
+			if (msg.message == WM_HOTKEY && msg.wParam == 1) 
+			{
+				m_keymancer_enabled = !m_keymancer_enabled;
+				std::cout << "toggle pressed...\n";
+			}
+
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);
 		}
 
 		UnhookWindowsHookEx(mouseHook);
 		UnhookWindowsHookEx(keyboardHook);
+		UnregisterHotKey(nullptr, 1);
 	}
 }

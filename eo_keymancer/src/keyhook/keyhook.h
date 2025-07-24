@@ -1,7 +1,9 @@
 #pragma once
 
-#include <windows.h>
 #include "../remapper/remapper.h"
+
+#include <windows.h>
+#include <atomic>
 
 static remapper::Remapper* m_remapper;
 
@@ -21,6 +23,7 @@ namespace keyHook
 		static input::Input mouseWParamToInput(WPARAM w_param);
 
 	private:
-
+		static remapper::Remapper* m_remapper;
+		static std::atomic<bool> m_keymancer_enabled;
 	};
-} // namespace remapper
+} // namespace keyHook
