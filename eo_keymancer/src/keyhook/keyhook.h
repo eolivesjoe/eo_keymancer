@@ -25,5 +25,6 @@ namespace keyHook
 	private:
 		static remapper::Remapper* m_remapper;
 		static std::atomic<bool> m_keymancer_enabled;
+		static std::atomic<bool> m_running;
 	};
 } // namespace keyHook

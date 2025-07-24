@@ -9,6 +9,7 @@ namespace keyHook
 {
 	remapper::Remapper* KeyHook::m_remapper = nullptr;
 	std::atomic<bool> KeyHook::m_keymancer_enabled = false;
+	std::atomic<bool> KeyHook::m_running = true;
 
 
 	KeyHook::KeyHook(remapper::Remapper& remapper)
@@ -183,18 +184,26 @@ namespace keyHook
 		}
 
 		RegisterHotKey(nullptr, 1, 0, VK_HOME);
+		RegisterHotKey(nullptr, 2, 0, VK_DELETE);
+
 		logger::info("press HOME to toggle rebind...");
+		logger::info("press DEL twice to exit...");
 
 		logger::info("keymancer running...");
 
 		MSG msg;
 
-		while (GetMessage(&msg, nullptr, 0, 0))
+		while (GetMessage(&msg, nullptr, 0, 0) && m_running)
 		{
 			if (msg.message == WM_HOTKEY && msg.wParam == 1) 
 			{
 				m_keymancer_enabled = !m_keymancer_enabled;
 				m_keymancer_enabled ? logger::info("keymancer enabled...") : logger::info("keymancer disabled...");
+			}
+
+			if (msg.message == WM_HOTKEY && msg.wParam == 2)
+			{
+				m_running = false;
 			}
 
 			TranslateMessage(&msg);
@@ -203,6 +212,8 @@ namespace keyHook
 
 		UnhookWindowsHookEx(mouseHook);
 		UnhookWindowsHookEx(keyboardHook);
+
 		UnregisterHotKey(nullptr, 1);
+		UnregisterHotKey(nullptr, 2);
 	}
 }
