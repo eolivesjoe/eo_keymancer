@@ -22,7 +22,6 @@ namespace keyHook
 		{
 			KBDLLHOOKSTRUCT* p = (KBDLLHOOKSTRUCT*)lParam;
 
-			// ignore injected input events
 			if (p->flags & LLKHF_INJECTED)
 			{
 				return CallNextHookEx(nullptr, nCode, wParam, lParam);
@@ -85,7 +84,6 @@ namespace keyHook
 		{
 			MSLLHOOKSTRUCT* p = (MSLLHOOKSTRUCT*)lParam;
 
-			// ignore injected input events
 			if (p->flags & LLMHF_INJECTED) 
 			{
 				return CallNextHookEx(nullptr, nCode, wParam, lParam);
