@@ -17,7 +17,7 @@ namespace remapper
 
 		if (!file.is_open())
 		{
-			logger::error("Failed to open config: ");
+			logger::error("Failed to open config:");
 			logger::error(config_path);
 			return false;
 		}
@@ -52,7 +52,7 @@ namespace remapper
 
 		if (delim == std::string::npos || delim == 0 || delim + 2 >= line.size())
 		{
-			logger::warn("there is an error in the cfg, skipping line...");
+			logger::warn("this is not a rebind, skipping line...");
 			return;
 		}
 
