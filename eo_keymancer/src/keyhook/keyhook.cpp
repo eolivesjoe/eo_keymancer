@@ -1,4 +1,5 @@
 #include "keyhook.h"
+#include "worker.h"
 #include "../input/input_utils.h"
 #include "../logger/logger.h"
 
@@ -19,39 +20,54 @@ namespace keyHook
 		if (nCode == HC_ACTION)
 		{
 			KBDLLHOOKSTRUCT* p = (KBDLLHOOKSTRUCT*)lParam;
-			input::Input incoming_input = keyboardVkToInput(p->vkCode);
+			input::Input real_input = keyboardVkToInput(p->vkCode, wParam);
 
-			if (m_remapper->hasMapping(incoming_input))
+			if (m_remapper->hasMapping(real_input))
 			{
-				input::Input mapped_key = m_remapper->getMappedKey(incoming_input);
+				input::Input mapping = m_remapper->getMappedKey(real_input);
 
-				INPUT new_input = { 0 };
-				new_input.type = INPUT_KEYBOARD;
-				new_input.ki.wVk = mapped_key.code;
+				INPUT fake_input = { 0 };
+				fake_input.type = INPUT_KEYBOARD;
+				fake_input.ki.wVk = mapping.code;
 
-				if (wParam == WM_KEYDOWN || WM_SYSKEYDOWN)
+				if (mapping.state == input::State::Down)
 				{
-					new_input.ki.dwFlags = 0;
-				}
-				else if (wParam == WM_KEYUP || WM_SYSKEYUP)\
-				{
-					new_input.ki.dwFlags = KEYEVENTF_KEYUP;
+					fake_input.ki.dwFlags = 0;
 				}
 				else
 				{
-					return CallNextHookEx(nullptr, nCode, wParam, lParam);
+					fake_input.ki.dwFlags = KEYEVENTF_KEYUP;
 				}
 
-				SendInput(1, &new_input, sizeof(INPUT));
+				Worker::queueInput(fake_input);
 				return 1;
 			}
 		}
 		return CallNextHookEx(nullptr, nCode, wParam, lParam);
 	}
 
-	input::Input KeyHook::keyboardVkToInput(DWORD vk_code)
+	input::Input KeyHook::keyboardVkToInput(DWORD vk_code, WPARAM w_param)
 	{
-		return input::Input{ input::InputType::Keyboard, static_cast<int>(vk_code) };
+		input::State state;
+
+		switch (w_param)
+		{
+		case WM_KEYDOWN:
+		case WM_SYSKEYDOWN:
+			state = input::State::Down;
+			break;
+
+		case WM_KEYUP:
+		case WM_SYSKEYUP:
+			state = input::State::Up;
+			break;
+
+		default:
+			state = input::State::Down;
+			break;
+		}
+
+		return input::Input{ input::Type::Keyboard, static_cast<int>(vk_code), state };
 	}
 
 
@@ -60,15 +76,50 @@ namespace keyHook
 		if (nCode == HC_ACTION)
 		{
 			MSLLHOOKSTRUCT* p = (MSLLHOOKSTRUCT*)lParam;
+			input::Input real_input = mouseWParamToInput(wParam);
 
-			switch (wParam)
+			if (m_remapper->hasMapping(real_input))
 			{
-			case WM_LBUTTONDOWN:
-				// Example: Remap left-click to right-click
-				INPUT input = { 0 };
-				input.type = INPUT_MOUSE;
-				input.mi.dwFlags = MOUSEEVENTF_RIGHTDOWN;
-				SendInput(1, &input, sizeof(INPUT));
+				input::Input mapping = m_remapper->getMappedKey(real_input);
+
+				INPUT fake_input = { 0 };
+				fake_input.type = INPUT_MOUSE;
+
+				switch (mapping.code)
+				{
+				case input::MOUSE_LEFT:
+					fake_input.mi.dwFlags = (mapping.state == input::State::Down)
+						? MOUSEEVENTF_LEFTDOWN
+						: MOUSEEVENTF_LEFTUP;
+					break;
+
+				case input::MOUSE_RIGHT:
+					fake_input.mi.dwFlags = (mapping.state == input::State::Down)
+						? MOUSEEVENTF_RIGHTDOWN
+						: MOUSEEVENTF_RIGHTUP;
+					break;
+
+				case input::MOUSE_MIDDLE:
+					fake_input.mi.dwFlags = (mapping.state == input::State::Down)
+						? MOUSEEVENTF_MIDDLEDOWN
+						: MOUSEEVENTF_MIDDLEUP;
+					break;
+
+				case input::MOUSE_X1:
+				case input::MOUSE_X2:
+					fake_input.mi.dwFlags = (mapping.state == input::State::Down)
+						? MOUSEEVENTF_XDOWN
+						: MOUSEEVENTF_XUP;
+
+					fake_input.mi.mouseData = (mapping.code == input::MOUSE_X1)
+						? XBUTTON1
+						: XBUTTON2;
+					break;
+
+				default:
+					break;
+				}
+				Worker::queueInput(fake_input);
 				return 1;
 			}
 		}
@@ -77,35 +128,47 @@ namespace keyHook
 
 	input::Input KeyHook::mouseWParamToInput(WPARAM w_param)
 	{
-		using namespace input;
 		switch (w_param)
 		{
 		case WM_LBUTTONDOWN:
+			return input::Input{ input::Type::Mouse, input::MOUSE_LEFT, input::State::Down };
 		case WM_LBUTTONUP:
-			return Input{ InputType::Mouse, MOUSE_LEFT };
+			return input::Input{ input::Type::Mouse, input::MOUSE_LEFT, input::State::Up };
 		case WM_RBUTTONDOWN:
+			return input::Input{ input::Type::Mouse, input::MOUSE_RIGHT, input::State::Down };
 		case WM_RBUTTONUP:
-			return Input{ InputType::Mouse, MOUSE_RIGHT };
+			return input::Input{ input::Type::Mouse, input::MOUSE_RIGHT, input::State::Up };
 		case WM_MBUTTONDOWN:
+			return input::Input{ input::Type::Mouse, input::MOUSE_MIDDLE, input::State::Down };
 		case WM_MBUTTONUP:
-			return Input{ InputType::Mouse, MOUSE_MIDDLE };
+			return input::Input{ input::Type::Mouse, input::MOUSE_MIDDLE, input::State::Up };
 		case WM_XBUTTONDOWN:
+			return input::Input{ input::Type::Mouse, input::MOUSE_X1, input::State::Down };
 		case WM_XBUTTONUP:
-			return Input{ InputType::Mouse, MOUSE_X1 };
+			return input::Input{ input::Type::Mouse, input::MOUSE_X1, input::State::Up };
 		default:
-			return Input{ InputType::Keyboard, 0 };
+			return input::Input{ input::Type::Keyboard, 0, input::State::Down };
 		}
 	}
 
 	void KeyHook::run()
 	{
-		HHOOK hook = SetWindowsHookEx(WH_KEYBOARD_LL, keyboardProc, nullptr, 0);
+		HHOOK keyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, (HOOKPROC)keyboardProc, nullptr, 0);
 
-		if (!hook)
+		if (!keyboardHook)
 		{
-			logger::error("failed to install hook...");
+			logger::error("failed to install keyboard hook...");
 			return;
 		}
+
+		HHOOK mouseHook = SetWindowsHookEx(WH_MOUSE_LL, (HOOKPROC)mouseProc, nullptr, 0);
+
+		if (!mouseHook)
+		{
+			logger::error("failed to install mouse hook...");
+			return;
+		}
+
 		logger::info("keymancer running...");
 
 		MSG msg;
@@ -116,6 +179,7 @@ namespace keyHook
 			DispatchMessage(&msg);
 		}
 
-		UnhookWindowsHookEx(hook);
+		UnhookWindowsHookEx(mouseHook);
+		UnhookWindowsHookEx(keyboardHook);
 	}
 }

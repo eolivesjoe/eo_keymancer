@@ -8,6 +8,6 @@ namespace input
 {
 	bool Input::operator==(const Input& other) const
 	{
-		return type == other.type && code == other.code;
+		return type == other.type && code == other.code && state == other.state;
 	}
 }

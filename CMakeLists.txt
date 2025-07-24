@@ -13,6 +13,7 @@ add_executable(eo_keymancer
     eo_keymancer/src/remapper/remapper.cpp
     eo_keymancer/src/input/input.cpp
     eo_keymancer/src/keyhook/keyhook.cpp
+    eo_keymancer/src/keyhook/worker.cpp
 	eo_keymancer/src/autopress/autopress.cpp
 	eo_keymancer/src/logger/logger.cpp
 )

@@ -3,6 +3,8 @@
 #include <windows.h>
 #include "../remapper/remapper.h"
 
+static remapper::Remapper* m_remapper;
+
 namespace keyHook
 {
 	class KeyHook
@@ -13,13 +15,12 @@ namespace keyHook
 
 	private:
 		static LRESULT CALLBACK keyboardProc(int nCode, WPARAM wParam, LPARAM lParam);
-		static input::Input keyboardVkToInput(DWORD vk_code);
+		static input::Input keyboardVkToInput(DWORD vk_code, WPARAM w_param);
 
 		static LRESULT CALLBACK mouseProc(int nCode, WPARAM wParam, LPARAM lParam);
 		static input::Input mouseWParamToInput(WPARAM w_param);
 
 	private:
-		static remapper::Remapper* m_remapper;
 
 	};
 } // namespace remapper

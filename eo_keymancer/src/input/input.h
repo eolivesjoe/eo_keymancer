@@ -4,23 +4,28 @@
 
 namespace input
 {
-	class Input
-	{
-	public:
-		InputType type;
-		int code;
-
-		bool operator==(const Input& other) const;
-
-		Input parse(const std::string& str);
-
-	private:
-
-	};
-
-	enum class InputType
+	enum class Type
 	{
 		Keyboard,
 		Mouse
+	};
+
+	enum class State
+	{
+		Down,
+		Up
+	};
+
+	class Input
+	{
+	public:
+		Type type;
+		int code;
+		State state;
+
+		bool operator==(const Input& other) const;
+
+	private:
+
 	};
 } // namespace input

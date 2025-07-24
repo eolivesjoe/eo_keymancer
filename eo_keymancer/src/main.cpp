@@ -1,5 +1,6 @@
 #include "remapper/remapper.h"
 #include "keyhook/keyhook.h"
+#include "keyhook/worker.h"
 #include "logger/logger.h"
 
 int main() 
@@ -12,8 +13,12 @@ int main()
         return 1;
     }
 
-    keyHook::KeyHook hook(remapper);
-    hook.run();
 
+    keyHook::KeyHook hook(remapper);
+    keyHook::Worker worker;
+
+    worker.start();
+    hook.run();
+    worker.stop();
     return 0;
 }

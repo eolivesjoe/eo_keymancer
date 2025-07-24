@@ -19,7 +19,7 @@ namespace remapper
 	private:
 		bool isValidMappingLine(const std::string& line); 
 		void processMappingLine(const std::string& line);
-		input::Input parseInput(const std::string& s);
+		input::Input parseInput(const std::string& s, input::State state);
 
 	private:
 		std::string config_path;

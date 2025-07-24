@@ -9,7 +9,7 @@
 
 namespace remapper
 {
-	Remapper::Remapper(const std::string& config_path) : config_path(config_path) { }
+	Remapper::Remapper(const std::string& config_path) : config_path(config_path) {}
 
 	bool Remapper::load()
 	{
@@ -59,11 +59,19 @@ namespace remapper
 		std::string fromStr = line.substr(0, delim);
 		std::string toStr = line.substr(delim + 2);
 
-		input::Input from = parseInput(fromStr);
-		input::Input to = parseInput(toStr);
+		logger::info(fromStr);
+		logger::info("to");
+		logger::info(toStr);
+
+		for (auto state : { input::State::Down, input::State::Up })
+		{
+			input::Input from = parseInput(fromStr, state);
+			input::Input to = parseInput(toStr, state);
+
+			remaps[from] = to;
+		}
 
 
-		remaps[from] = to;
 	}
 
 	bool Remapper::hasMapping(const input::Input& input) const
@@ -77,31 +85,31 @@ namespace remapper
 		return it != remaps.end() ? it->second : input;
 	}
 
-	input::Input Remapper::parseInput(const std::string& s)
+	input::Input Remapper::parseInput(const std::string& s, input::State state)
 	{
 		if (s.size() == 1)
 		{
 			char c = s[0];
 			short vk = VkKeyScanA(c);
-			return input::Input{ input::InputType::Keyboard, vk & 0xFF };
+			return input::Input{ input::Type::Keyboard, vk & 0xFF, state };
 		}
 
 		if (s.rfind("mouse") == 0)
 		{
-			if (s == "mouse1") return input::Input{ input::InputType::Mouse, input::MOUSE_MIDDLE };
-			if (s == "mouse2") return input::Input{ input::InputType::Mouse, input::MOUSE_RIGHT };
-			if (s == "mouse3") return input::Input{ input::InputType::Mouse, input::MOUSE_MIDDLE };
-			if (s == "mouse4") return input::Input{ input::InputType::Mouse, input::MOUSE_X1 };
-			if (s == "mouse5") return input::Input{ input::InputType::Mouse, input::MOUSE_X2 };
+			if (s == "mouse1") return input::Input{ input::Type::Mouse, input::MOUSE_LEFT, state };
+			if (s == "mouse2") return input::Input{ input::Type::Mouse, input::MOUSE_RIGHT, state };
+			if (s == "mouse3") return input::Input{ input::Type::Mouse, input::MOUSE_MIDDLE, state };
+			if (s == "mouse4") return input::Input{ input::Type::Mouse, input::MOUSE_X1, state };
+			if (s == "mouse5") return input::Input{ input::Type::Mouse, input::MOUSE_X2, state };
 		}
 		else
 		{
-			if (s == "space") return input::Input{ input::InputType::Keyboard, VK_SPACE };
-			if (s == "ctrl")  return input::Input{ input::InputType::Keyboard, VK_CONTROL };
-			if (s == "shift") return input::Input{ input::InputType::Keyboard, VK_SHIFT };
+			if (s == "space") return input::Input{ input::Type::Keyboard, VK_SPACE, state };
+			if (s == "ctrl")  return input::Input{ input::Type::Keyboard, VK_CONTROL, state };
+			if (s == "shift") return input::Input{ input::Type::Keyboard, VK_SHIFT, state };
 		}
 
 		logger::warn("unrecognized key in cfg");
-		return input::Input{ input::InputType::Keyboard, 0 };
+		return input::Input{ input::Type::Keyboard, 0, state };
 	}
 }
