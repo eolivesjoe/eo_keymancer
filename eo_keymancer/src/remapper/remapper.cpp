@@ -59,10 +59,6 @@ namespace remapper
 		std::string fromStr = line.substr(0, delim);
 		std::string toStr = line.substr(delim + 2);
 
-		logger::info(fromStr);
-		logger::info("to");
-		logger::info(toStr);
-
 		for (auto state : { input::State::Down, input::State::Up })
 		{
 			input::Input from = parseInput(fromStr, state);

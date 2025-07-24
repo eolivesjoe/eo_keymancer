@@ -196,7 +196,7 @@ namespace keyHook
 			if (msg.message == WM_HOTKEY && msg.wParam == 1) 
 			{
 				m_keymancer_enabled = !m_keymancer_enabled;
-				std::cout << "toggle pressed...\n";
+				m_keymancer_enabled ? logger::info("keymancer enabled...") : logger::info("keymancer disabled...");
 			}
 
 			TranslateMessage(&msg);
