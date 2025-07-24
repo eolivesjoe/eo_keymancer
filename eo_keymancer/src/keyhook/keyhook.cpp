@@ -21,6 +21,13 @@ namespace keyHook
 		if (nCode == HC_ACTION)
 		{
 			KBDLLHOOKSTRUCT* p = (KBDLLHOOKSTRUCT*)lParam;
+
+			// ignore injected input events
+			if (p->flags & LLKHF_INJECTED)
+			{
+				return CallNextHookEx(nullptr, nCode, wParam, lParam);
+			}
+
 			input::Input real_input = keyboardVkToInput(p->vkCode, wParam);
 
 			if (m_keymancer_enabled && m_remapper->hasMapping(real_input))
@@ -77,6 +84,13 @@ namespace keyHook
 		if (nCode == HC_ACTION)
 		{
 			MSLLHOOKSTRUCT* p = (MSLLHOOKSTRUCT*)lParam;
+
+			// ignore injected input events
+			if (p->flags & LLMHF_INJECTED) 
+			{
+				return CallNextHookEx(nullptr, nCode, wParam, lParam);
+			}
+
 			input::Input real_input = mouseWParamToInput(wParam);
 
 			if (m_keymancer_enabled && m_remapper->hasMapping(real_input))
