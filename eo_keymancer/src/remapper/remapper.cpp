@@ -9,16 +9,16 @@
 
 namespace remapper
 {
-	Remapper::Remapper(const std::string& config_path) : config_path(config_path) {}
+	Remapper::Remapper(const std::string& configPath) : configPath(configPath) {}
 
-	bool Remapper::load()
+	bool Remapper::Load()
 	{
-		std::ifstream file(config_path);
+		std::ifstream file(configPath);
 
 		if (!file.is_open())
 		{
-			logger::error("Failed to open config:");
-			logger::error(config_path);
+			logger::Error("Failed to open config:");
+			logger::Error(configPath);
 			return false;
 		}
 
@@ -26,15 +26,15 @@ namespace remapper
 
 		while (std::getline(file, line))
 		{
-			if (isValidMappingLine(line))
+			if (IsValidMappingLine(line))
 			{
-				processMappingLine(line);
+				ProcessMappingLine(line);
 			}
 		}
 		return true;
 	}
 
-	bool Remapper::isValidMappingLine(const std::string& line)
+	bool Remapper::IsValidMappingLine(const std::string& line)
 	{
 		if (line.empty() || line[0] == '#')
 		{
@@ -46,13 +46,13 @@ namespace remapper
 		return delim != std::string::npos && delim != 0 && delim + 2 < line.size();
 	}
 
-	void Remapper::processMappingLine(const std::string& line)
+	void Remapper::ProcessMappingLine(const std::string& line)
 	{
 		size_t delim = line.find("--");
 
 		if (delim == std::string::npos || delim == 0 || delim + 2 >= line.size())
 		{
-			logger::warn("this is not a rebind, skipping line...");
+			logger::Warn("this is not a rebind, skipping line...");
 			return;
 		}
 
@@ -61,8 +61,8 @@ namespace remapper
 
 		for (auto state : { input::State::Down, input::State::Up })
 		{
-			input::Input from = parseInput(fromStr, state);
-			input::Input to = parseInput(toStr, state);
+			input::Input from = ParseInput(fromStr, state);
+			input::Input to = ParseInput(toStr, state);
 
 			remaps[from] = to;
 		}
@@ -70,18 +70,18 @@ namespace remapper
 
 	}
 
-	bool Remapper::hasMapping(const input::Input& input) const
+	bool Remapper::HasMapping(const input::Input& input) const
 	{
 		return remaps.find(input) != remaps.end();
 	}
 
-	input::Input Remapper::getMappedKey(const input::Input& input) const
+	input::Input Remapper::GetMappedKey(const input::Input& input) const
 	{
 		auto it = remaps.find(input);
 		return it != remaps.end() ? it->second : input;
 	}
 
-	input::Input Remapper::parseInput(const std::string& s, input::State state)
+	input::Input Remapper::ParseInput(const std::string& s, input::State state)
 	{
 		if (s.size() == 1)
 		{
@@ -105,7 +105,7 @@ namespace remapper
 			if (s == "shift") return input::Input{ input::Type::Keyboard, VK_SHIFT, state };
 		}
 
-		logger::warn("unrecognized key in cfg");
+		logger::Warn("unrecognized key in cfg");
 		return input::Input{ input::Type::Keyboard, 0, state };
 	}
 }

@@ -5,20 +5,20 @@
 
 int main() 
 {
-    logger::init();
+    logger::Init();
 
     remapper::Remapper remapper("config/remap.cfg");
-    if (!remapper.load())
+    if (!remapper.Load())
     {
         return 1;
     }
 
 
-    keyHook::KeyHook hook(remapper);
-    keyHook::Worker worker;
+    key_hook::KeyHook hook(remapper);
+    key_hook::Worker worker;
 
-    worker.start();
-    hook.run();
-    worker.stop();
+    worker.Start();
+    hook.Run();
+    worker.Stop();
     return 0;
 }

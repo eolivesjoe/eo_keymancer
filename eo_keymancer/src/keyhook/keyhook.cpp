@@ -5,10 +5,10 @@
 
 #include <iostream>
 
-namespace keyHook
+namespace key_hook
 {
 	remapper::Remapper* KeyHook::m_remapper = nullptr;
-	std::atomic<bool> KeyHook::m_keymancer_enabled = false;
+	std::atomic<bool> KeyHook::m_keymancerEnabled = false;
 	std::atomic<bool> KeyHook::m_running = true;
 
 
@@ -17,7 +17,7 @@ namespace keyHook
 		m_remapper = &remapper;
 	}
 
-	LRESULT CALLBACK KeyHook::keyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
+	LRESULT CALLBACK KeyHook::KeyboardProc(int nCode, WPARAM wParam, LPARAM lParam)
 	{
 		if (nCode == HC_ACTION)
 		{
@@ -28,37 +28,37 @@ namespace keyHook
 				return CallNextHookEx(nullptr, nCode, wParam, lParam);
 			}
 
-			input::Input real_input = keyboardVkToInput(p->vkCode, wParam);
+			input::Input realInput = KeyboardVkToInput(p->vkCode, wParam);
 
-			if (m_keymancer_enabled && m_remapper->hasMapping(real_input))
+			if (m_keymancerEnabled && m_remapper->HasMapping(realInput))
 			{
-				input::Input mapping = m_remapper->getMappedKey(real_input);
+				input::Input mapping = m_remapper->GetMappedKey(realInput);
 
-				INPUT fake_input = { 0 };
-				fake_input.type = INPUT_KEYBOARD;
-				fake_input.ki.wVk = mapping.code;
+				INPUT fakeInput = { 0 };
+				fakeInput.type = INPUT_KEYBOARD;
+				fakeInput.ki.wVk = mapping.code;
 
 				if (mapping.state == input::State::Down)
 				{
-					fake_input.ki.dwFlags = 0;
+					fakeInput.ki.dwFlags = 0;
 				}
 				else
 				{
-					fake_input.ki.dwFlags = KEYEVENTF_KEYUP;
+					fakeInput.ki.dwFlags = KEYEVENTF_KEYUP;
 				}
 
-				Worker::queueInput(fake_input);
+				Worker::QueueInput(fakeInput);
 				return 1;
 			}
 		}
 		return CallNextHookEx(nullptr, nCode, wParam, lParam);
 	}
 
-	input::Input KeyHook::keyboardVkToInput(DWORD vk_code, WPARAM w_param)
+	input::Input KeyHook::KeyboardVkToInput(DWORD vkCode, WPARAM wParam)
 	{
 		input::State state;
 
-		switch (w_param)
+		switch (wParam)
 		{
 		case WM_KEYDOWN:
 		case WM_SYSKEYDOWN:
@@ -75,11 +75,11 @@ namespace keyHook
 			break;
 		}
 
-		return input::Input{ input::Type::Keyboard, static_cast<int>(vk_code), state };
+		return input::Input{ input::Type::Keyboard, static_cast<int>(vkCode), state };
 	}
 
 
-	LRESULT CALLBACK KeyHook::mouseProc(int nCode, WPARAM wParam, LPARAM lParam)
+	LRESULT CALLBACK KeyHook::MouseProc(int nCode, WPARAM wParam, LPARAM lParam)
 	{
 		if (nCode == HC_ACTION)
 		{
@@ -90,42 +90,42 @@ namespace keyHook
 				return CallNextHookEx(nullptr, nCode, wParam, lParam);
 			}
 
-			input::Input real_input = mouseWParamToInput(wParam);
+			input::Input realInput = MouseWParamToInput(wParam);
 
-			if (m_keymancer_enabled && m_remapper->hasMapping(real_input))
+			if (m_keymancerEnabled && m_remapper->HasMapping(realInput))
 			{
-				input::Input mapping = m_remapper->getMappedKey(real_input);
+				input::Input mapping = m_remapper->GetMappedKey(realInput);
 
-				INPUT fake_input = { 0 };
-				fake_input.type = INPUT_MOUSE;
+				INPUT fakeInput = { 0 };
+				fakeInput.type = INPUT_MOUSE;
 
 				switch (mapping.code)
 				{
 				case input::MOUSE_LEFT:
-					fake_input.mi.dwFlags = (mapping.state == input::State::Down)
+					fakeInput.mi.dwFlags = (mapping.state == input::State::Down)
 						? MOUSEEVENTF_LEFTDOWN
 						: MOUSEEVENTF_LEFTUP;
 					break;
 
 				case input::MOUSE_RIGHT:
-					fake_input.mi.dwFlags = (mapping.state == input::State::Down)
+					fakeInput.mi.dwFlags = (mapping.state == input::State::Down)
 						? MOUSEEVENTF_RIGHTDOWN
 						: MOUSEEVENTF_RIGHTUP;
 					break;
 
 				case input::MOUSE_MIDDLE:
-					fake_input.mi.dwFlags = (mapping.state == input::State::Down)
+					fakeInput.mi.dwFlags = (mapping.state == input::State::Down)
 						? MOUSEEVENTF_MIDDLEDOWN
 						: MOUSEEVENTF_MIDDLEUP;
 					break;
 
 				case input::MOUSE_X1:
 				case input::MOUSE_X2:
-					fake_input.mi.dwFlags = (mapping.state == input::State::Down)
+					fakeInput.mi.dwFlags = (mapping.state == input::State::Down)
 						? MOUSEEVENTF_XDOWN
 						: MOUSEEVENTF_XUP;
 
-					fake_input.mi.mouseData = (mapping.code == input::MOUSE_X1)
+					fakeInput.mi.mouseData = (mapping.code == input::MOUSE_X1)
 						? XBUTTON1
 						: XBUTTON2;
 					break;
@@ -133,16 +133,16 @@ namespace keyHook
 				default:
 					break;
 				}
-				Worker::queueInput(fake_input);
+				Worker::QueueInput(fakeInput);
 				return 1;
 			}
 		}
 		return CallNextHookEx(nullptr, nCode, wParam, lParam);
 	}
 
-	input::Input KeyHook::mouseWParamToInput(WPARAM w_param)
+	input::Input KeyHook::MouseWParamToInput(WPARAM wParam)
 	{
-		switch (w_param)
+		switch (wParam)
 		{
 		case WM_LBUTTONDOWN:
 			return input::Input{ input::Type::Mouse, input::MOUSE_LEFT, input::State::Down };
@@ -165,31 +165,31 @@ namespace keyHook
 		}
 	}
 
-	void KeyHook::run()
+	void KeyHook::Run()
 	{
-		HHOOK keyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, (HOOKPROC)keyboardProc, nullptr, 0);
+		HHOOK keyboardHook = SetWindowsHookEx(WH_KEYBOARD_LL, (HOOKPROC)KeyboardProc, nullptr, 0);
 
 		if (!keyboardHook)
 		{
-			logger::error("failed to install keyboard hook...");
+			logger::Error("failed to install keyboard hook...");
 			return;
 		}
 
-		HHOOK mouseHook = SetWindowsHookEx(WH_MOUSE_LL, (HOOKPROC)mouseProc, nullptr, 0);
+		HHOOK mouseHook = SetWindowsHookEx(WH_MOUSE_LL, (HOOKPROC)MouseProc, nullptr, 0);
 
 		if (!mouseHook)
 		{
-			logger::error("failed to install mouse hook...");
+			logger::Error("failed to install mouse hook...");
 			return;
 		}
 
 		RegisterHotKey(nullptr, 1, 0, VK_HOME);
 		RegisterHotKey(nullptr, 2, 0, VK_DELETE);
 
-		logger::info("press HOME to toggle rebind...");
-		logger::info("press DEL twice to exit...");
+		logger::Info("press HOME to toggle rebind...");
+		logger::Info("press DEL twice to exit...");
 
-		logger::info("keymancer running...");
+		logger::Info("keymancer running...");
 
 		MSG msg;
 
@@ -197,8 +197,8 @@ namespace keyHook
 		{
 			if (msg.message == WM_HOTKEY && msg.wParam == 1) 
 			{
-				m_keymancer_enabled = !m_keymancer_enabled;
-				m_keymancer_enabled ? logger::info("keymancer enabled...") : logger::info("keymancer disabled...");
+				m_keymancerEnabled = !m_keymancerEnabled;
+				m_keymancerEnabled ? logger::Info("keymancer enabled...") : logger::Info("keymancer disabled...");
 			}
 
 			if (msg.message == WM_HOTKEY && msg.wParam == 2)

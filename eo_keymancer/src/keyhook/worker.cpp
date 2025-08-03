@@ -1,64 +1,64 @@
 #include "worker.h"
 
-namespace keyHook
+namespace key_hook
 {
-	std::queue<INPUT> Worker::queue;
-	std::mutex Worker::m;
-	std::condition_variable Worker::cv;
-	std::atomic<bool> Worker::running = false;
-	std::thread Worker::t;
+	std::queue<INPUT> Worker::m_queue;
+	std::mutex Worker::m_mutex;
+	std::condition_variable Worker::m_cv;
+	std::atomic<bool> Worker::m_running = false;
+	std::thread Worker::m_thread;
 
-	void Worker::start()
+	void Worker::Start()
 	{
-		running = true;
-		t = std::thread(inputWorker);
+		m_running = true;
+		m_thread = std::thread(InputWorker);
 	}
 
-	void Worker::stop()
+	void Worker::Stop()
 	{
-		running = false;
-		cv.notify_all();
+		m_running = false;
+		m_cv.notify_all();
 
-		if (t.joinable())
+		if (m_thread.joinable())
 		{
-			t.join();
+			m_thread.join();
 		}
 	}
 
-	void Worker::queueInput(const INPUT& input)
+	void Worker::QueueInput(const INPUT& input)
 	{
 		{
-			std::lock_guard<std::mutex> lock(m);
-			queue.push(input);
+			std::lock_guard<std::mutex> lock(m_mutex);
+			m_queue.push(input);
 		}
-		cv.notify_one();
+		m_cv.notify_one();
 	}
 
-	void Worker::inputWorker()
+	void Worker::InputWorker()
 	{
-		while (running)
+		while (m_running)
 		{
 			INPUT input;
-			bool has_input = false;
+			bool hasInput = false;
 
 			{
-				std::unique_lock<std::mutex> lock(m);
-				cv.wait(lock, [] {
-					return !queue.empty() || !running;
+				std::unique_lock<std::mutex> lock(m_mutex);
+				m_cv.wait(lock, [] {
+					return !m_queue.empty() || !m_running;
 					});
 
-				if (!queue.empty())
+				if (!m_queue.empty())
 				{
-					input = queue.front();
-					queue.pop();
-					has_input = true;
+					input = m_queue.front();
+					m_queue.pop();
+					hasInput = true;
 				}
 
-				if (!has_input && !running)
+				if (!hasInput && !m_running)
 					return;
 			}
 
-			if (has_input)
+			if (hasInput)
 			{
 				SendInput(1, &input, sizeof(INPUT));
 			}

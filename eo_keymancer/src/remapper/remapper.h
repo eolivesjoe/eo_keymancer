@@ -11,18 +11,18 @@ namespace remapper
 	class Remapper
 	{
 	public:
-		Remapper(const std::string& config_path);
-		bool load();
-		bool hasMapping(const input::Input& input) const;
-		input::Input getMappedKey(const input::Input& input) const;
+		Remapper(const std::string& configPath);
+		bool Load();
+		bool HasMapping(const input::Input& input) const;
+		input::Input GetMappedKey(const input::Input& input) const;
 
 	private:
-		bool isValidMappingLine(const std::string& line); 
-		void processMappingLine(const std::string& line);
-		input::Input parseInput(const std::string& s, input::State state);
+		bool IsValidMappingLine(const std::string& line); 
+		void ProcessMappingLine(const std::string& line);
+		input::Input ParseInput(const std::string& s, input::State state);
 
 	private:
-		std::string config_path;
+		std::string configPath;
 		std::unordered_map<input::Input, input::Input> remaps;
 	};
 } // namespace remapper
