@@ -89,6 +89,7 @@ namespace remapper
 			return input::Input{ input::Type::Keyboard, vk & 0xFF, state };
 		}
 
+		// https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
 		if (s.rfind("mouse") == 0)
 		{
 			if (s == "mouse1") return input::Input{ input::Type::Mouse, input::MOUSE_LEFT, state };
@@ -100,11 +101,16 @@ namespace remapper
 		else
 		{
 			if (s == "space") return input::Input{ input::Type::Keyboard, VK_SPACE, state };
-			if (s == "ctrl")  return input::Input{ input::Type::Keyboard, VK_CONTROL, state };
-			if (s == "shift") return input::Input{ input::Type::Keyboard, VK_SHIFT, state };
+			if (s == "lctrl")  return input::Input{ input::Type::Keyboard, VK_LCONTROL, state };
+			if (s == "rctrl")  return input::Input{ input::Type::Keyboard, VK_RCONTROL, state };
+			if (s == "lshift") return input::Input{ input::Type::Keyboard, VK_LSHIFT, state };
+			if (s == "rshift") return input::Input{ input::Type::Keyboard, VK_RSHIFT, state };
+			if (s == "lalt") return input::Input{ input::Type::Keyboard, VK_LMENU, state };
+			if (s == "ralt") return input::Input{ input::Type::Keyboard, VK_RMENU, state };
+			if (s == "caps") return input::Input{ input::Type::Keyboard, VK_CAPITAL, state };
 		}
 
-		logger::Warn("unrecognized key in cfg");
+		logger::Warn("unrecognized key in config");
 		return input::Input{ input::Type::Keyboard, 0, state };
 	}
 }
