@@ -22,7 +22,7 @@ namespace remapper
 		input::Input ParseInput(const std::string& s, input::State state);
 
 	private:
-		std::string configPath;
-		std::unordered_map<input::Input, input::Input> remaps;
+		std::string m_configName;
+		std::unordered_map<input::Input, input::Input> m_remaps;
 	};
 } // namespace remapper

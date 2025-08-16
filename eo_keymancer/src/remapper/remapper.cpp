@@ -9,16 +9,15 @@
 
 namespace remapper
 {
-	Remapper::Remapper(const std::string& configPath) : configPath(configPath) {}
+	Remapper::Remapper(const std::string& configName) : m_configName(configName) {}
 
 	bool Remapper::Load()
 	{
-		std::ifstream file(configPath);
+		std::ifstream file(m_configName);
 
 		if (!file.is_open())
 		{
-			logger::Error("Failed to open config:");
-			logger::Error(configPath);
+			logger::Error("Failed to open config: " + m_configName);
 			return false;
 		}
 
@@ -64,7 +63,7 @@ namespace remapper
 			input::Input from = ParseInput(fromStr, state);
 			input::Input to = ParseInput(toStr, state);
 
-			remaps[from] = to;
+			m_remaps[from] = to;
 		}
 
 
@@ -72,13 +71,13 @@ namespace remapper
 
 	bool Remapper::HasMapping(const input::Input& input) const
 	{
-		return remaps.find(input) != remaps.end();
+		return m_remaps.find(input) != m_remaps.end();
 	}
 
 	input::Input Remapper::GetMappedKey(const input::Input& input) const
 	{
-		auto it = remaps.find(input);
-		return it != remaps.end() ? it->second : input;
+		auto it = m_remaps.find(input);
+		return it != m_remaps.end() ? it->second : input;
 	}
 
 	input::Input Remapper::ParseInput(const std::string& s, input::State state)
