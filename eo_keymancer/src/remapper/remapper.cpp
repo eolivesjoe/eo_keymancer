@@ -35,7 +35,7 @@ namespace remapper
 
 	bool Remapper::IsValidMappingLine(const std::string& line)
 	{
-		if (line.empty() || line[0] == '#')
+		if (line.empty() || line.rfind("//", 0) == 0)
 		{
 			return false;
 		}
