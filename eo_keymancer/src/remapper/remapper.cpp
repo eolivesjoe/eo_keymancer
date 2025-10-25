@@ -63,7 +63,7 @@ namespace remapper
 			input::Input from = ParseInput(fromStr, state);
 			input::Input to = ParseInput(toStr, state);
 
-			m_remaps[from] = to;
+			m_remaps[to] = from;
 		}
 
 
@@ -109,9 +109,19 @@ namespace remapper
 			if (s == "ralt") return input::Input{ input::Type::Keyboard, VK_RMENU, state };
 			if (s == "caps") return input::Input{ input::Type::Keyboard, VK_CAPITAL, state };
 			if (s == "tab") return input::Input{ input::Type::Keyboard, VK_TAB, state };
+
+			if (s.size() >= 2 && s[0] == 'f')
+			{
+				int fn = std::stoi(s.substr(1));
+				if (fn >= 1 && fn <= 12)
+				{
+					return input::Input{ input::Type::Keyboard, VK_F1 + (fn - 1), state };
+				}
+			}
 		}
 
 		logger::Warn("unrecognized key in config");
+		logger::Warn(s);
 		return input::Input{ input::Type::Keyboard, 0, state };
 	}
 }
