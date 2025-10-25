@@ -25,6 +25,7 @@ int main(int argc, char* argv[])
     logger::Info("Loading config: " + configName);
 
     remapper::Remapper remapper(configName);
+
     if (!remapper.Load())
     {
         return 1;
