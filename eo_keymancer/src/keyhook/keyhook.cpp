@@ -30,6 +30,8 @@ namespace key_hook
 
 			input::Input realInput = KeyboardVkToInput(p->vkCode, wParam);
 
+			logger::Info("vkCode: " + std::to_string(p->vkCode));
+
 			if (m_keymancerEnabled && m_remapper->HasMapping(realInput))
 			{
 				input::Input mapping = m_remapper->GetMappedKey(realInput);
