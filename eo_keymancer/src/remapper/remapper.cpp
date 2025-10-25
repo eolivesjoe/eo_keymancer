@@ -40,13 +40,23 @@ namespace remapper
 			return false;
 		}
 
-		return line.size() == 2;
+		size_t delim = line.find("--");
+
+		return delim != std::string::npos && delim != 0 && delim + 2 < line.size();
 	}
 
 	void Remapper::ProcessMappingLine(const std::string& line)
 	{
-		std::string fromStr(1, line[0]);
-		std::string toStr(1, line[1]);
+		size_t delim = line.find("--");
+
+		if (delim == std::string::npos || delim == 0 || delim + 2 >= line.size())
+		{
+			logger::Warn("this is not a rebind, skipping line...");
+			return;
+		}
+
+		std::string fromStr = line.substr(0, delim);
+		std::string toStr = line.substr(delim + 2);
 
 		for (auto state : { input::State::Down, input::State::Up })
 		{
