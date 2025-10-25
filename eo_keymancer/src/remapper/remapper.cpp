@@ -108,6 +108,7 @@ namespace remapper
 			if (s == "lalt") return input::Input{ input::Type::Keyboard, VK_LMENU, state };
 			if (s == "ralt") return input::Input{ input::Type::Keyboard, VK_RMENU, state };
 			if (s == "caps") return input::Input{ input::Type::Keyboard, VK_CAPITAL, state };
+			if (s == "tab") return input::Input{ input::Type::Keyboard, VK_TAB, state };
 		}
 
 		logger::Warn("unrecognized key in config");
