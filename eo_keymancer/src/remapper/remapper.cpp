@@ -63,10 +63,10 @@ namespace remapper
 			input::Input from = ParseInput(fromStr, state);
 			input::Input to = ParseInput(toStr, state);
 
-			m_remaps[to] = from;
+			m_remaps[from] = to;
 		}
 
-
+		logger::Info("Mapping " + fromStr + " -> " + toStr);
 	}
 
 	bool Remapper::HasMapping(const input::Input& input) const
