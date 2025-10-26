@@ -18,5 +18,8 @@ add_executable(eo_keymancer
 	eo_keymancer/src/logger/logger.cpp
 )
 
-file(COPY ${CMAKE_SOURCE_DIR}/eo_keymancer/config/
-     DESTINATION ${CMAKE_SOURCE_DIR}/bin/config)
+add_custom_command(TARGET eo_keymancer POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+        ${CMAKE_SOURCE_DIR}/eo_keymancer/config
+        $<TARGET_FILE_DIR:eo_keymancer>/config
+)
