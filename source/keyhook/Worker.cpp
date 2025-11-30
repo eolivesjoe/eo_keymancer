@@ -1,6 +1,6 @@
-#include "worker.h"
+#include "Worker.h"
 
-namespace key_hook
+namespace keyhook
 {
 	std::queue<INPUT> Worker::m_queue;
 	std::mutex Worker::m_mutex;

@@ -1,11 +1,11 @@
 #include "keyhook.h"
 #include "worker.h"
-#include "../input/input_utils.h"
+#include "../input/InputUtils.h"
 #include "../logger/logger.h"
 
 #include <iostream>
 
-namespace key_hook
+namespace keyhook
 {
 	remapper::Remapper* KeyHook::m_remapper = nullptr;
 	std::atomic<bool> KeyHook::m_keymancerEnabled = false;

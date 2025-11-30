@@ -1,6 +1,6 @@
-#include "remapper.h"
-#include "../logger/logger.h"
-#include "../input/input_utils.h"
+#include "Remapper.h"
+#include "../logger/Logger.h"
+#include "../input/InputUtils.h"
 
 #include <fstream>
 #include <iostream>
@@ -48,12 +48,6 @@ namespace remapper
 	void Remapper::ProcessMappingLine(const std::string& line)
 	{
 		size_t delim = line.find("--");
-
-		if (delim == std::string::npos || delim == 0 || delim + 2 >= line.size())
-		{
-			logger::Warn("this is not a rebind, skipping line...");
-			return;
-		}
 
 		std::string fromStr = line.substr(0, delim);
 		std::string toStr = line.substr(delim + 2);

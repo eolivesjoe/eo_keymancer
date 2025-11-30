@@ -7,7 +7,7 @@
 #include <atomic>
 #include <windows.h>
 
-namespace key_hook
+namespace keyhook
 {
 	class Worker
 	{
@@ -25,4 +25,4 @@ namespace key_hook
 		static std::atomic<bool> m_running;
 		static std::thread m_thread;
 	};
-} // namespace key_hook
+} // namespace keyhook

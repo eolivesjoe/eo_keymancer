@@ -1,6 +1,6 @@
-#include "input.h"
-#include "input_utils.h"
-#include "../logger/logger.h"
+#include "Input.h"
+#include "InputUtils.h"
+#include "../logger/Logger.h"
 
 #include <windows.h>
 

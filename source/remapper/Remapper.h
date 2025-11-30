@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../input/input.h"
-#include "../input/input_hash.h"
+#include "../input/Input.h"
+#include "../input/InputHash.h"
 
 #include <unordered_map>
 #include <string>

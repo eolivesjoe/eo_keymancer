@@ -32,8 +32,8 @@ int main(int argc, char* argv[])
     }
 
 
-    key_hook::KeyHook hook(remapper);
-    key_hook::Worker worker;
+    keyhook::KeyHook hook(remapper);
+    keyhook::Worker worker;
 
     worker.Start();
     hook.Run();

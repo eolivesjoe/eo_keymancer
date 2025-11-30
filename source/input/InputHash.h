@@ -1,6 +1,6 @@
 #pragma once
 
-#include "input.h"
+#include "Input.h"
 #include <functional>
 
 namespace std 
